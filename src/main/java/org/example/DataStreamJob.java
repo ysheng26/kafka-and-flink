@@ -49,13 +49,18 @@ public class DataStreamJob {
 
 		KafkaSource<String> source = KafkaSource.<String>builder()
 				.setBootstrapServers("localhost:9092")
-				.setTopics("input-topic")
+				.setTopics("cigarette-prices")
 				.setGroupId("my-group")
 				.setStartingOffsets(OffsetsInitializer.earliest())
 				.setValueOnlyDeserializer(new SimpleStringSchema())
 				.build();
 
-		// what is noWatermarks?
+		// setting no watermarks means all messages go through
+		// (1) a watermark in flink means if the message time is "above/newer" than the watermark it survives
+		//     or else the message time is "below/older" than the watermark so it drowns
+		// (2) if a kafka source parallisim is bigger than the number of kafka partitions
+		//     the extra ones are not sitting idle, it holds back the min watermark as -Infinity
+		//     need to set it with `WatermarkStrategy.withIdleness`. See https://nightlies.apache.org/flink/flink-docs-stable/docs/connectors/datastream/kafka/#idleness
 		env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source");
 
 		// Execute program, beginning computation.
