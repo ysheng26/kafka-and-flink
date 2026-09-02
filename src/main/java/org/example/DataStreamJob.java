@@ -64,8 +64,10 @@ public class DataStreamJob {
 		//     the extra ones are not sitting idle, it holds back the min watermark as -Infinity
 		//     need to set it with `WatermarkStrategy.withIdleness`. See https://nightlies.apache.org/flink/flink-docs-stable/docs/connectors/datastream/kafka/#idleness
 		env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source")
-				.setParallelism(1) // kafka source operator parallelism
-				.print("Kafka Record")
+				.setParallelism(3) // kafka source operator parallelism
+				.map(new SubtaskAnnotatingMap())
+				.setParallelism(3) // our operator parallelism
+				.print("Kafka Record") // stdout sink
 				.setParallelism(1); // print sink operator parallelism
 
 		// Execute program, beginning computation.
