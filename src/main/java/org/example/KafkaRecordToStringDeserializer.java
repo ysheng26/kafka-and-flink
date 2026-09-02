@@ -15,10 +15,15 @@ public class KafkaRecordToStringDeserializer implements KafkaRecordDeserializati
 
     @Override
     public void deserialize(ConsumerRecord<byte[], byte[]> record, Collector<String> out) throws IOException {
-//        String key = new String(record.key());
         String value = new String(record.value());
-//        out.collect(key + " " + value);
-        out.collect(record + " " + value);
+        StringBuilder sb = new StringBuilder();
+        sb.append("topic: ").append(record.topic())
+//                .append(", key: ").append(record.key())
+                .append(", partition: ").append(record.partition())
+                .append(", offset: ").append(record.offset())
+                .append(", value: ").append(value);
+//        out.collect(record + " " + value);
+        out.collect(sb.toString());
     }
 
 }
