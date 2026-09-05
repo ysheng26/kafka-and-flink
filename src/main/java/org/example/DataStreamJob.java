@@ -19,7 +19,6 @@
 package org.example;
 
 import org.apache.flink.api.common.eventtime.WatermarkStrategy;
-import org.apache.flink.api.common.serialization.SimpleStringSchema;
 import org.apache.flink.connector.kafka.source.KafkaSource;
 import org.apache.flink.connector.kafka.source.enumerator.initializer.OffsetsInitializer;
 import org.apache.flink.streaming.api.datastream.DataStreamSource;
@@ -48,7 +47,7 @@ public class DataStreamJob {
 		// default operator parallelism
 		env.setParallelism(1);
 
-		KafkaSource<String> source = KafkaSource.<String>builder()
+		KafkaSource<String> cigaretteSource = KafkaSource.<String>builder()
 				.setBootstrapServers("localhost:9092")
 				.setTopics("cigarette-prices")
 				.setGroupId("my-group")
@@ -56,16 +55,25 @@ public class DataStreamJob {
 				.setDeserializer(new KafkaRecordToStringDeserializer())
 				.build();
 
-		// Setting no watermarks means all messages go through
-		// (1) a watermark in flink means if the message time is "above/newer" than the watermark it survives
-		//     or else the message time is "below/older" than the watermark so it drowns
-		// (2) if a kafka source parallelism is bigger than the number of kafka partitions
-		//     the extra ones are not sitting idle, it holds back the min watermark as -Infinity
-		//     need to set it with `WatermarkStrategy.withIdleness`. See https://nightlies.apache.org/flink/flink-docs-stable/docs/connectors/datastream/kafka/#idleness
-		env.fromSource(source, WatermarkStrategy.noWatermarks(), "Kafka Source")
-				.setParallelism(1) // kafka source operator parallelism
+		KafkaSource<String> alcoholSource = KafkaSource.<String>builder()
+				.setBootstrapServers("localhost:9092")
+				.setTopics("alcohol-prices")
+				.setGroupId("my-group")
+				.setStartingOffsets(OffsetsInitializer.earliest())
+				.setDeserializer(new KafkaRecordToStringDeserializer())
+				.build();
+
+		DataStreamSource<String> cigaretteStream =
+				env.fromSource(cigaretteSource, WatermarkStrategy.noWatermarks(), "Cigarette Kafka Source")
+				.setParallelism(3); // kafka source operator parallelism
+
+		DataStreamSource<String> alcoholStream =
+				env.fromSource(alcoholSource, WatermarkStrategy.noWatermarks(), "Alcohol Kafka Source")
+				.setParallelism(4); // kafka source operator parallelism
+
+		cigaretteStream.union(alcoholStream)
 				.map(new SubtaskAnnotatingMap())
-				.setParallelism(1) // our operator parallelism
+				.setParallelism(2) // our operator parallelism
 				.print("Kafka Record") // stdout sink
 				.setParallelism(1); // print sink operator parallelism
 

@@ -1,14 +1,12 @@
 #!/bin/bash
-# docker compose exec kafka \
-#     /opt/kafka/bin/kafka-console-consumer.sh \
-#     --bootstrap-server localhost:9092 \
-#     --topic cigarette-prices \
-#     --from-beginning
+set -euo pipefail
+
+topic="$1"
 
 docker compose exec kafka \
   /opt/kafka/bin/kafka-console-consumer.sh \
   --bootstrap-server localhost:9092 \
-  --topic cigarette-prices \
+  --topic "$topic" \
   --from-beginning \
   --property print.key=true \
   --property print.partition=true \
