@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 printf '%s\n' \
   'America:{"brand":"Marlboro","price":13.0,"country":"America"}' \
   'China:{"brand":"Chunghua","price":14.0,"country":"China"}' \
