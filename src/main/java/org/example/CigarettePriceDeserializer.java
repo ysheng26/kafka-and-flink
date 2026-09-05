@@ -16,7 +16,9 @@ public class CigarettePriceDeserializer implements KafkaRecordDeserializationSch
             return;
         }
         CigarettePrice price = mapper.readValue(record.value(), CigarettePrice.class);
-
+        price.setTopic(record.topic());
+        price.setOffset(record.offset());
+        price.setPartition(record.partition());
         out.collect(price);
     }
 

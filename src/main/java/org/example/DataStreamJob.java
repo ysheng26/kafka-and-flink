@@ -71,8 +71,10 @@ public class DataStreamJob {
 				env.fromSource(alcoholSource, WatermarkStrategy.noWatermarks(), "Alcohol Kafka Source")
 				.setParallelism(4); // kafka source operator parallelism
 
-		cigaretteStream.print("Cigarette");
-		alcoholStream.print("Alcohol");
+		cigaretteStream.connect(alcoholStream)
+				.map(new PriceConnectMap()).setParallelism(3)
+				.map(new SubtaskAnnotatingMap()).setParallelism(3)
+				.print().setParallelism(1);
 
 		// Execute program, beginning computation.
 		env.execute("Flink Java API Skeleton");

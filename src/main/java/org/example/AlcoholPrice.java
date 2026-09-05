@@ -6,9 +6,12 @@ public class AlcoholPrice {
     private double price;
     private String country;
 
-    public AlcoholPrice(){
+    // just for demo, adding kafka meta here
+    private String topic;
+    private int partition;
+    private long offset;
 
-    }
+    public AlcoholPrice(){}
 
     public String getBrand() {return brand;}
     public void setBrand(String brand) {this.brand = brand;}
@@ -19,8 +22,17 @@ public class AlcoholPrice {
     public String getCountry() {return country;}
     public void setCountry(String country) {this.country = country;}
 
+    public long getOffset() {return offset;}
+    public void setOffset(long offset) {this.offset = offset;}
+
+    public int getPartition() {return partition;}
+    public void setPartition(int partition) {this.partition = partition;}
+
+    public String getTopic() {return topic;}
+    public void setTopic(String topic) {this.topic = topic;}
+
     @Override
     public String toString() {
-        return "AlcoholPrice{" + "brand=" + brand + ", price=" + price + ", country=" + country + '}';
+        return "AlcoholPrice{" + "brand=" + brand + ", price=" + price + ", country=" + country + ", topic=" + topic + ", partition=" + partition + ", offset=" + offset + '}';
     }
 }

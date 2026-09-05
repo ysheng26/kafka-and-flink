@@ -16,7 +16,9 @@ public class AlcoholPriceDeserializer implements KafkaRecordDeserializationSchem
             return;
         }
         AlcoholPrice price = mapper.readValue(record.value(), AlcoholPrice.class);
-
+        price.setTopic(record.topic());
+        price.setOffset(record.offset());
+        price.setPartition(record.partition());
         out.collect(price);
     }
 
