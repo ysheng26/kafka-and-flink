@@ -18,11 +18,9 @@ public class KafkaRecordToStringDeserializer implements KafkaRecordDeserializati
         String value = new String(record.value());
         StringBuilder sb = new StringBuilder();
         sb.append("topic: ").append(record.topic())
-//                .append(", key: ").append(record.key())
                 .append(", partition: ").append(record.partition())
                 .append(", offset: ").append(record.offset())
                 .append(", value: ").append(value);
-//        out.collect(record + " " + value);
         out.collect(sb.toString());
     }
 

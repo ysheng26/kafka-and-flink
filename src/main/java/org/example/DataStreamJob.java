@@ -47,35 +47,32 @@ public class DataStreamJob {
 		// default operator parallelism
 		env.setParallelism(1);
 
-		KafkaSource<String> cigaretteSource = KafkaSource.<String>builder()
+		KafkaSource<CigarettePrice> cigaretteSource = KafkaSource.<CigarettePrice>builder()
 				.setBootstrapServers("localhost:9092")
 				.setTopics("cigarette-prices")
 				.setGroupId("my-group")
 				.setStartingOffsets(OffsetsInitializer.earliest())
-				.setDeserializer(new KafkaRecordToStringDeserializer())
+				.setDeserializer(new CigarettePriceDeserializer())
 				.build();
 
-		KafkaSource<String> alcoholSource = KafkaSource.<String>builder()
+		KafkaSource<AlcoholPrice> alcoholSource = KafkaSource.<AlcoholPrice>builder()
 				.setBootstrapServers("localhost:9092")
 				.setTopics("alcohol-prices")
 				.setGroupId("my-group")
 				.setStartingOffsets(OffsetsInitializer.earliest())
-				.setDeserializer(new KafkaRecordToStringDeserializer())
+				.setDeserializer(new AlcoholPriceDeserializer())
 				.build();
 
-		DataStreamSource<String> cigaretteStream =
+		DataStreamSource<CigarettePrice> cigaretteStream =
 				env.fromSource(cigaretteSource, WatermarkStrategy.noWatermarks(), "Cigarette Kafka Source")
 				.setParallelism(3); // kafka source operator parallelism
 
-		DataStreamSource<String> alcoholStream =
+		DataStreamSource<AlcoholPrice> alcoholStream =
 				env.fromSource(alcoholSource, WatermarkStrategy.noWatermarks(), "Alcohol Kafka Source")
 				.setParallelism(4); // kafka source operator parallelism
 
-		cigaretteStream.union(alcoholStream)
-				.map(new SubtaskAnnotatingMap())
-				.setParallelism(2) // our operator parallelism
-				.print("Kafka Record") // stdout sink
-				.setParallelism(1); // print sink operator parallelism
+		cigaretteStream.print("Cigarette");
+		alcoholStream.print("Alcohol");
 
 		// Execute program, beginning computation.
 		env.execute("Flink Java API Skeleton");
