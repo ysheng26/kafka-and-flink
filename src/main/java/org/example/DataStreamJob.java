@@ -72,6 +72,7 @@ public class DataStreamJob {
 				.setParallelism(4); // kafka source operator parallelism
 
 		cigaretteStream.connect(alcoholStream)
+				.keyBy(CigarettePrice::getCountry, AlcoholPrice::getCountry)
 				.map(new PriceConnectMap()).setParallelism(3)
 				.map(new SubtaskAnnotatingMap()).setParallelism(3)
 				.print().setParallelism(1);
